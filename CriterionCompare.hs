@@ -10,6 +10,7 @@ import Data.Csv
 import qualified Data.Vector as V
 import qualified Data.ByteString.Lazy.Char8 as BSL
 import Lucid
+import Style
 import Numeric
 
 -- | The name of a set of benchmark results from a single run.
@@ -95,7 +96,7 @@ tabulateRelative refRun results =
       = showAbs stats
       | Just refStats <- M.lookup bench results >>= M.lookup refRun
       = let rel = (statsMean stats - statsMean refStats) / statsMean refStats
-            cls = T.pack $ "stat-"++sign++show n
+            cls = T.pack $ "stat-"++sign++show (abs n)
               where sign = if rel > 0 then "p" else "n"
                     n = min 10 $ max (-10) $ round $ 10*rel :: Int
         in span_ [class_ cls] $ toHtml $ showGFloat (Just 1) (100*rel) "%"
@@ -108,6 +109,7 @@ main :: IO ()
 main = do
     results <- sequence [ M.singleton (RunName "old") <$> readResults "old.csv"
                         , M.singleton (RunName "new") <$> readResults "new.csv"
+                        , M.singleton (RunName "inline _bind") <$> readResults "bind.csv"
                         ]
     --let table = tabulateAbsolute $ invert $ M.unions results
     let table = tabulateRelative (RunName "old") $ invert $ M.unions results 
@@ -116,5 +118,5 @@ main = do
         head_ $ do
             title_ "Criterion comparison"
             meta_ [ charset_ "UTF-8" ]
-            style_ ".stddev { font-size: small; } td { padding: 0 1em; }"
+            style_ style
         body_ $ toTable table
