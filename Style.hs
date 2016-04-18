@@ -18,7 +18,7 @@ style' = do
         paddingRight (em 1)
 
     forM_ [0..10] $ \n -> do
-        star # byClass (T.pack $ "stat-p"++show (round n)) ? do backgroundColor $ hsl 0 (shadeSat $ n/8) 90
-        star # byClass (T.pack $ "stat-n"++show (round n)) ? do backgroundColor $ hsl 128 (shadeSat $ n/8) 90
+        star # byClass (T.pack $ "stat-p"++show (round n)) ? do backgroundColor $ hsl 0 (shadeSat n) 90
+        star # byClass (T.pack $ "stat-n"++show (round n)) ? do backgroundColor $ hsl 128 (shadeSat n) 90
 
-shadeSat n = 30 + 60*n
+shadeSat n = 0 + 10*n
