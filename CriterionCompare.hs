@@ -1,10 +1,13 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE TupleSections #-}
 
 import qualified Data.Map.Strict as M
 import qualified Data.Text as T
 import Control.Applicative
 import Control.Monad (forM_)
+import Data.Maybe (fromMaybe)
 import Data.Csv
 import qualified Data.Vector as V
 import qualified Data.ByteString.Lazy.Char8 as BSL
@@ -13,6 +16,8 @@ import Numeric
 import Graphics.Rendering.Chart (toRenderable)
 import Graphics.Rendering.Chart.Backend.Diagrams (renderableToFile)
 import Data.Default
+import Options.Applicative
+import System.FilePath (takeFileName, dropExtension)
 
 import Style
 import Plot
@@ -98,16 +103,26 @@ tabulateRelative refRun results =
 
     showAbs stats = toHtml $ showGFloat (Just 2) (statsMean stats) ""
 
+data Options = Options { optRunNames :: [RunName]
+                       , optRunPaths :: [FilePath]
+                       }
+
+options :: Options.Applicative.Parser Options
+options =
+    Options <$> many (option (RunName <$> str) $ short 'l' <> long "label" <> help "label")
+            <*> many (argument str $ metavar "FILE" <> help "CSV file name")
+
 main :: IO ()
 main = do
-    results <- sequence [ M.singleton (RunName "old") <$> readResults "old.csv"
-                        , M.singleton (RunName "new") <$> readResults "new.csv"
-                        , M.singleton (RunName "inline _bind") <$> readResults "bind.csv"
+    Options{..} <- execParser $ info (helper <*> options) mempty
+    results <- sequence [ (name',) <$> readResults path
+                        | (name, path) <- zip (map Just optRunNames ++ repeat Nothing) optRunPaths
+                        , let name' = fromMaybe (RunName $ dropExtension $ takeFileName path) name
                         ]
 
-    renderableToFile def "hi.svg" $ toRenderable $ plot $ M.unions results
+    renderableToFile def "hi.svg" $ toRenderable $ plot $ M.fromList results
     --let table = tabulateAbsolute $ invert $ M.unions results
-    let table = tabulateRelative (RunName "old") $ invert $ M.unions results
+    let table = tabulateRelative (fst $ head results) $ invert $ M.fromList results
 
     renderToFile "hi.html" $ doctypehtml_ $ do
         head_ $ do

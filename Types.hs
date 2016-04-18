@@ -15,3 +15,4 @@ newtype BenchName = BenchName {getBenchName :: String}
 data Stats = Stats { statsMean, statsMeanLB, statsMeanUB :: Double
                    , statsStd, statsStdLB, statsStdUB :: Double
                    }
+           deriving (Show)
