@@ -10,8 +10,12 @@ import qualified Data.Vector as V
 import qualified Data.ByteString.Lazy.Char8 as BSL
 import Lucid
 import Numeric
+import Graphics.Rendering.Chart (toRenderable)
+import Graphics.Rendering.Chart.Backend.Diagrams (renderableToFile)
+import Data.Default
 
 import Style
+import Plot
 import Types
 
 data BenchResult = BenchResult { benchName :: BenchName
@@ -100,8 +104,10 @@ main = do
                         , M.singleton (RunName "new") <$> readResults "new.csv"
                         , M.singleton (RunName "inline _bind") <$> readResults "bind.csv"
                         ]
+
+    renderableToFile def "hi.svg" $ toRenderable $ plot $ M.unions results
     --let table = tabulateAbsolute $ invert $ M.unions results
-    let table = tabulateRelative (RunName "old") $ invert $ M.unions results 
+    let table = tabulateRelative (RunName "old") $ invert $ M.unions results
 
     renderToFile "hi.html" $ doctypehtml_ $ do
         head_ $ do
