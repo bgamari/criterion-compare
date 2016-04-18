@@ -1,4 +1,3 @@
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE FlexibleContexts #-}
 
@@ -10,20 +9,10 @@ import Data.Csv
 import qualified Data.Vector as V
 import qualified Data.ByteString.Lazy.Char8 as BSL
 import Lucid
-import Style
 import Numeric
 
--- | The name of a set of benchmark results from a single run.
-newtype RunName = RunName String
-                deriving (Eq, Ord, Show, FromField)
-
--- | The name of a benchmark
-newtype BenchName = BenchName String
-                  deriving (Eq, Ord, Show, FromField)
-
-data Stats = Stats { statsMean, statsMeanLB, statsMeanUB :: Double
-                   , statsStd, statsStdLB, statsStdUB :: Double
-                   }
+import Style
+import Types
 
 data BenchResult = BenchResult { benchName :: BenchName
                                , benchStats :: Stats
