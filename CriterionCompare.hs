@@ -8,7 +8,7 @@ import qualified Data.Text as T
 import Control.Applicative
 import Control.Monad (forM_)
 import Data.Maybe (fromMaybe)
-import System.FilePath (takeFileName, dropExtension)
+import System.FilePath (takeFileName, dropExtension, (<.>))
 import Numeric
 import Lucid
 import Graphics.Rendering.Chart (toRenderable)
@@ -71,12 +71,14 @@ tabulateRelative refRun results =
     showAbs stats = toHtml $ showGFloat (Just 2) (statsMean stats) ""
 
 data Options = Options { optRunNames :: [RunName]
+                       , optOutput   :: FilePath
                        , optRunPaths :: [FilePath]
                        }
 
 options :: Options.Applicative.Parser Options
 options =
     Options <$> many (option (RunName <$> str) $ short 'l' <> long "label" <> help "label")
+            <*> option str (short 'o' <> long "output" <> metavar "FILE" <> help "output file name" <> value "comparison")
             <*> many (argument str $ metavar "FILE" <> help "CSV file name")
 
 main :: IO ()
@@ -87,11 +89,11 @@ main = do
                         , let name' = fromMaybe (RunName $ dropExtension $ takeFileName path) name
                         ]
 
-    renderableToFile def "hi.svg" $ toRenderable $ plot $ M.fromList results
+    renderableToFile def (optOutput <.> "svg") $ toRenderable $ plot $ M.fromList results
     --let table = tabulateAbsolute $ invert $ M.unions results
     let table = tabulateRelative (fst $ head results) $ invert $ M.fromList results
 
-    renderToFile "hi.html" $ doctypehtml_ $ do
+    renderToFile (optOutput <.> "html") $ doctypehtml_ $ do
         head_ $ do
             title_ "Criterion comparison"
             meta_ [ charset_ "UTF-8" ]
