@@ -63,7 +63,7 @@ tabulateRelative refRun results =
       = let rel = (statsMean stats - statsMean refStats) / statsMean refStats
             cls = T.pack $ "stat-"++sign++show (abs n)
               where sign = if rel > 0 then "p" else "n"
-                    n = min 10 $ max (-10) $ round $ rel / 0.05 :: Int
+                    n = min 10 $ max (-10) $ round $ rel / 0.025 :: Int
         in span_ [class_ cls] $ toHtml $ showGFloat (Just 1) (100*rel) "%"
       | otherwise
       = showAbs stats
