@@ -21,9 +21,4 @@ style' = do
         star # byClass (T.pack $ "stat-p"++show (round n)) ? do backgroundColor $ shade 0 n
         star # byClass (T.pack $ "stat-n"++show (round n)) ? do backgroundColor $ shade 128 n
 
--- start by increasing saturation up to sMax then decreasing lightness from
--- lMax; I think this makes the colors easier to see:
-shade h n = hsl h (min sMax n10) (min lMax (lMax - (n10-sMax)))
-    where n10 = n*10
-          lMax = 90
-          sMax = 75
+shade h n = hsl h 60 (100 - (5*n))
