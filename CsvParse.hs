@@ -29,12 +29,12 @@ instance FromRecord BenchResult where
       | otherwise = empty
       where bench a b c d e f g = BenchResult a (Stats b c d e f g)
 
-readResults :: FilePath -> IO (M.Map BenchName Stats)
+readResults :: FilePath -> IO [(BenchName, Stats)]
 readResults fname = do
     mxs <- parseResults <$> BSL.readFile fname
     case mxs of
       Left err -> fail err
-      Right xs -> return $ M.fromList $ map (\(BenchResult a b) -> (a, b)) $ V.toList xs
+      Right xs -> return $ map (\(BenchResult a b) -> (a, b)) $ V.toList xs
 
 parseResults :: BSL.ByteString -> Either String (V.Vector BenchResult)
 parseResults =
