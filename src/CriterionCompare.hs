@@ -15,7 +15,7 @@ import Lucid.Base
 import Graphics.Rendering.Chart (toRenderable)
 import Graphics.Rendering.Chart.Backend.Diagrams (renderableToFile)
 import Data.Default
-import Options.Applicative
+import Options.Applicative hiding (style)
 
 import Style
 import Plot
@@ -48,7 +48,7 @@ toTable orderOrig results =
             let significance = sum $ map (either (const 0) (abs . snd)) $ M.elems runs
             -- hidden tds to let us sort by original benchmark order:
             td_ [class_ "orderOrig", style_ "display:none;"] (toHtml $ show o)
-            td_ [class_ "significance", style_ "display:none;"] 
+            td_ [class_ "significance", style_ "display:none;"]
               -- subtract as stupid hack to get reverse order on first click
               (toHtml $ show (99999 - significance))
             -- TODO "largest regression", "largest improvement", etc. Then we
@@ -114,7 +114,7 @@ main = do
             title_ "Criterion comparison"
             meta_ [ charset_ "UTF-8" ]
             style_ style
-        body_ $ 
+        body_ $
           -- for list.js:
           div_ [id_ "bench"] $ do
             input_ [class_ "search", placeholder_ "Filter by name"]
