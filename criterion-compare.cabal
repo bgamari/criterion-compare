@@ -30,7 +30,7 @@ executable criterion-compare
                        filepath >=1.4 && <1.5,
                        lucid >=2.9 && < 2.10,
                        Chart-diagrams >=1.6 && < 1.10,
-                       optparse-applicative >=0.12 && < 0.15,
+                       optparse-applicative >=0.12 && < 0.16,
                        clay >=0.10 && < 0.14,
                        vector >=0.11 && < 0.13,
                        bytestring >=0.10 && < 0.11
