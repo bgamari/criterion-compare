@@ -96,18 +96,46 @@ options =
             <*> option str (short 'o' <> long "output" <> metavar "FILE" <> help "output file name" <> value "comparison")
             <*> many (argument str $ metavar "FILE" <> help "CSV file name")
 
+addGeoMean :: [(RunName, M.Map BenchName Stats)] -> [(RunName, M.Map BenchName Stats)]
+addGeoMean input
+  -- Inputs have different benchmarks - geoMean makes no sense then.
+  | not (all (== head benchNames) benchNames) = input
+  | otherwise = map (\(run,stats) -> (run,mean_stat stats)) input
+
+  where
+    mean_stat stats = M.insert (BenchName "GeoMean (calculated)")
+                               (Stats { statsMean = (gm stats/head_mean)
+                                      , statsMeanLB = 0, statsMeanUB = 0
+                                      , statsStd = 0, statsStdLB = 0
+                                      , statsStdUB = 0 })
+                                stats
+    head_mean = gm . snd . head $ input
+
+    product = (M.foldl' (\total s -> statsMean s * total) 1.0)
+    entries m = fromIntegral $ M.size m :: Double
+    gm m = (product m) ** (1.0/entries m) :: Double
+
+    benchNames = map (M.keys . snd) input :: [[BenchName]]
+
+
+
+
+
+
 main :: IO ()
 main = do
     Options{..} <- execParser $ info (helper <*> options) mempty
     results <- sequence [ (name',) . M.fromList <$> readResults path
                         | (name, path) <- zip (map Just optRunNames ++ repeat Nothing) optRunPaths
                         , let name' = fromMaybe (RunName $ dropExtension $ takeFileName path) name
-                        ]
+                        ] :: IO [(RunName, M.Map BenchName Stats)]
 
-    orderOrig <- zipWith (\i (nm,_)-> (nm,i)) [0..] <$> (readResults $ head optRunPaths)
-    renderableToFile def (optOutput <.> "svg") $ toRenderable $ plot $ M.fromList results
+    let resultWithMean = addGeoMean results
+
+    orderOrig <- zipWith (\i (nm,_)-> (nm,i)) [0..] <$> (readResults $ head optRunPaths) :: IO [(BenchName, Int)]
+    renderableToFile def (optOutput <.> "svg") $ toRenderable $ plot $ M.fromList resultWithMean
     --let table = tabulateAbsolute $ invert $ M.unions results
-    let table = tabulateRelative (fst $ head results) $ invert $ M.fromList results
+    let table = tabulateRelative (fst $ head resultWithMean) $ invert $ M.fromList resultWithMean
 
     renderToFile (optOutput <.> "html") $ doctypehtml_ $ do
         head_ $ do
