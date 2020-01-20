@@ -37,4 +37,4 @@ executable criterion-compare
 
 source-repository head
   type:     git
-  location: https://github.com/AndreasPK/criterion-compare.git
+  location: https://github.com/bgamari/criterion-compare.git
