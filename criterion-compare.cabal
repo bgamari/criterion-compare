@@ -1,5 +1,6 @@
 name:                criterion-compare
 version:             0.1.0.0
+x-revision:          1
 synopsis:            A simple tool for visualising differences in Criterion benchmark results
 description:         Create a html file containing a quick comparison of results for the input files.
 homepage:            http://github.com/AndreasPK/criterion-compare
